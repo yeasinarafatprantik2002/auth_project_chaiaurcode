@@ -4,12 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 connect();
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const query = request.nextUrl.searchParams;
-    const token = query.get("token");
-    // console.log(token);
-    // const { token } = reqBody.toString();
+    const reqBody = await request.json();
+    const { token } = reqBody;
 
     const user = await User.findOne({
       verificationToken: token,

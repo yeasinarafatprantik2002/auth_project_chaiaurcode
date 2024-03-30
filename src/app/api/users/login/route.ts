@@ -31,28 +31,23 @@ export async function POST(request: NextRequest) {
     }
 
     const payload = {
-      user: {
-        id: user._id,
-      },
+      id: user._id,
+      username: user.username,
+      email: user.email,
     };
 
-    const token = jwt.sign(
-      payload,
-      process.env.TOKEN_SECRET!,
-      { expiresIn: "1d" },
-      ({ err, token }: any) => {
-        if (err) throw err;
-        return NextResponse.json({ token });
-      },
-    );
+    const token = jwt.sign(payload, process.env.TOKEN_SECRET!, {
+      expiresIn: "1d",
+    });
 
     const response = NextResponse.json({
       message: "Login successful",
       success: true,
     });
 
-    response.cookies.set("token", token!, {
+    response.cookies.set("token", token, {
       httpOnly: true,
+      secure: true,
     });
 
     return response;

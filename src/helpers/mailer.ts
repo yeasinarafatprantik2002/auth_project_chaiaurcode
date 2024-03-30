@@ -7,13 +7,17 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
     const hashedToken = uuidv5(userId.toString(), uuidv5.URL);
     if (emailType === "VERIFY") {
       await User.findByIdAndUpdate(userId, {
-        verificationToken: hashedToken,
-        verificationTokenExpires: Date.now() + 3600000,
+        $set: {
+          verificationToken: hashedToken,
+          verificationTokenExpires: Date.now() + 3600000,
+        },
       });
     } else if (emailType === "RESET") {
       await User.findByIdAndUpdate(userId, {
-        resetToken: hashedToken,
-        resetTokenExpires: Date.now() + 3600000,
+        $set: {
+          forgotPasswordToken: hashedToken,
+          forgotPasswordExpires: Date.now() + 3600000,
+        },
       });
     }
 
@@ -32,8 +36,12 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
       subject: emailType === "VERIFY" ? "Email Verification" : "Password Reset",
       html:
         emailType === "VERIFY"
-          ? `<a href="${process.env.DOMAIN}/api/users/verify/?token=${hashedToken}">Click here to verify your email</a>`
-          : `<a href="${process.env.DOMAIN}/reset/?token=${hashedToken}">Click here to reset your password</a>`,
+          ? `<a href="${process.env.DOMAIN}/api/users/verify/?token=${hashedToken}">Click here to verify your email</a>
+          <br>
+          <p>Or copy and paste the following link in your browser: ${hashedToken}</p>`
+          : `<a href="${process.env.DOMAIN}/reset/?token=${hashedToken}">Click here to reset your password</a>
+          <br>
+          <p>Or copy and paste the following link in your browser: ${hashedToken}</p>`,
     };
 
     const info = await transport.sendMail(mailOptions);
